@@ -36,7 +36,7 @@ _IS_KAGGLE = 'KAGGLE_URL_BASE' in os.environ
 if _IS_KAGGLE:
     PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
 else:
-    PERSISTENT_DIR = Path.home()
+    PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
 
 PERSISTENT_DIR.mkdir(parents=True, exist_ok=True)
 HOME = PERSISTENT_DIR
