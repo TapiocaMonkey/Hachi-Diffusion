@@ -27,29 +27,31 @@ if sample_data_path.exists() and sample_data_path.is_dir():
 
 # ================= PATH & GLOBAL CONSTANTS ================
 
-# ---- PERSISTENT STORAGE ----
+# ---- PATH CONFIGURATION ----
 _IS_KAGGLE = 'KAGGLE_URL_BASE' in os.environ
 
 if _IS_KAGGLE:
-    # venv e scripts: volatili in /root/ (si reinstallano veloci)
+    # Persistente: WebUI, modelli, settings
+    WEBUI_DIR = Path('/kaggle/working/sd-persistent')
+    SETTINGS_PATH = WEBUI_DIR / 'settings.json'
+    # Volatile: venv e scripts (si reinstallano veloci)
     HOME = Path('/root')
     VENV_PATH = Path('/root/venv')
-    # WebUI e modelli: persistenti in /kaggle/working/
-    WEBUI_DIR = Path('/kaggle/working/sd-persistent')
-    WEBUI_DIR.mkdir(parents=True, exist_ok=True)
 else:
     HOME = Path.home()
-    VENV_PATH = HOME / 'venv'
     WEBUI_DIR = HOME
+    VENV_PATH = HOME / 'venv'
+    SETTINGS_PATH = HOME / 'ANXETY' / 'settings.json'
 
-# Scripts e moduli: sempre in HOME (volatile su Kaggle, va bene)
+WEBUI_DIR.mkdir(parents=True, exist_ok=True)
+
+# Scripts e moduli: sempre volatili in HOME
 SCR_PATH = HOME / 'ANXETY'
 MODULES_FOLDER = SCR_PATH / 'modules'
 SCRIPTS_FOLDER = SCR_PATH / 'scripts'
-SETTINGS_PATH = SCR_PATH / 'settings.json'
 
 os.environ.update({
-    'home_path': str(WEBUI_DIR),   # WebUI si installa in WEBUI_DIR
+    'home_path': str(WEBUI_DIR),
     'scr_path': str(SCR_PATH),
     'venv_path': str(VENV_PATH),
     'scripts_path': str(SCRIPTS_FOLDER),
