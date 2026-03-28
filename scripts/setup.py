@@ -36,7 +36,7 @@ if _IS_KAGGLE:
     SETTINGS_PATH = WEBUI_DIR / 'settings.json'
     # Volatile: venv e scripts (si reinstallano veloci)
     HOME = Path('/root')
-    VENV_PATH = Path('/root/venv')
+    VENV_PATH = WEBUI_DIR / 'venv'
 else:
     HOME = Path.home()
     WEBUI_DIR = HOME
