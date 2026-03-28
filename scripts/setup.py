@@ -141,20 +141,20 @@ def save_env_to_json(data: dict, filepath: Path) -> None:
 # =================== MODULE MANAGEMENT ====================
 
 def _clear_module_cache(modules_folder=None):
-    """Clear module cache for modules in specified folder or default modules folder"""
     target_folder = Path(modules_folder) if modules_folder else MODULES_FOLDER
-    target_folder = target_folder.resolve()  # Full absolute path
+    try:
+        target_folder = target_folder.resolve()
+    except OSError:
+        return
 
     for module_name, module in list(sys.modules.items()):
         if hasattr(module, '__file__') and module.__file__:
-            module_path = Path(module.__file__).resolve()
             try:
+                module_path = Path(module.__file__).resolve()
                 if target_folder in module_path.parents:
                     del sys.modules[module_name]
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError, OSError):
                 continue
-
-    importlib.invalidate_caches()
 
 def setup_module_folder(modules_folder=None):
     """Set up module folder by clearing cache and adding to sys.path"""
