@@ -28,29 +28,28 @@ if sample_data_path.exists() and sample_data_path.is_dir():
 # ================= PATH & GLOBAL CONSTANTS ================
 
 # ---- PERSISTENT STORAGE ----
-# On Kaggle, install everything under /kaggle/working/sd-persistent so that
-# the environment can be saved as a Dataset Output and re-mounted in future
-# sessions as an Input dataset — making the installation truly persistent.
-# On other platforms (Colab, etc.) we fall back to the home directory as before.
 _IS_KAGGLE = 'KAGGLE_URL_BASE' in os.environ
+
 if _IS_KAGGLE:
-    PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
+    # venv e scripts: volatili in /root/ (si reinstallano veloci)
+    HOME = Path('/root')
+    VENV_PATH = Path('/root/venv')
+    # WebUI e modelli: persistenti in /kaggle/working/
+    WEBUI_DIR = Path('/kaggle/working/sd-persistent')
+    WEBUI_DIR.mkdir(parents=True, exist_ok=True)
 else:
-    PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
+    HOME = Path.home()
+    VENV_PATH = HOME / 'venv'
+    WEBUI_DIR = HOME
 
-PERSISTENT_DIR.mkdir(parents=True, exist_ok=True)
-HOME = PERSISTENT_DIR
-
-# Base project paths
+# Scripts e moduli: sempre in HOME (volatile su Kaggle, va bene)
 SCR_PATH = HOME / 'ANXETY'
-VENV_PATH = HOME / 'venv'
 MODULES_FOLDER = SCR_PATH / 'modules'
 SCRIPTS_FOLDER = SCR_PATH / 'scripts'
 SETTINGS_PATH = SCR_PATH / 'settings.json'
 
-# Add paths to the environment
 os.environ.update({
-    'home_path': str(HOME),
+    'home_path': str(WEBUI_DIR),   # WebUI si installa in WEBUI_DIR
     'scr_path': str(SCR_PATH),
     'venv_path': str(VENV_PATH),
     'scripts_path': str(SCRIPTS_FOLDER),
