@@ -27,18 +27,28 @@ if sample_data_path.exists() and sample_data_path.is_dir():
 
 # ================= PATH & GLOBAL CONSTANTS ================
 
-# ---- PATH CONFIGURATION ----
+# ---- PERSISTENT STORAGE ----
+# On Kaggle, install everything under /kaggle/working/sd-persistent so that
+# the environment can be saved as a Dataset Output and re-mounted in future
+# sessions as an Input dataset — making the installation truly persistent.
+# On other platforms (Colab, etc.) we fall back to the home directory as before.
 _IS_KAGGLE = 'KAGGLE_URL_BASE' in os.environ
+if _IS_KAGGLE:
+    PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
+else:
+    PERSISTENT_DIR = Path.home()
 
-HOME = Path('/root') if _IS_KAGGLE else Path.home()
-WEBUI_DIR = HOME
-VENV_PATH = HOME / 'venv'
-SETTINGS_PATH = HOME / 'ANXETY' / 'settings.json'
+PERSISTENT_DIR.mkdir(parents=True, exist_ok=True)
+HOME = PERSISTENT_DIR
 
+# Base project paths
 SCR_PATH = HOME / 'ANXETY'
+VENV_PATH = HOME / 'venv'
 MODULES_FOLDER = SCR_PATH / 'modules'
 SCRIPTS_FOLDER = SCR_PATH / 'scripts'
+SETTINGS_PATH = SCR_PATH / 'settings.json'
 
+# Add paths to the environment
 os.environ.update({
     'home_path': str(HOME),
     'scr_path': str(SCR_PATH),
@@ -141,20 +151,20 @@ def save_env_to_json(data: dict, filepath: Path) -> None:
 # =================== MODULE MANAGEMENT ====================
 
 def _clear_module_cache(modules_folder=None):
+    """Clear module cache for modules in specified folder or default modules folder"""
     target_folder = Path(modules_folder) if modules_folder else MODULES_FOLDER
-    try:
-        target_folder = target_folder.resolve()
-    except OSError:
-        return
+    target_folder = target_folder.resolve()  # Full absolute path
 
     for module_name, module in list(sys.modules.items()):
         if hasattr(module, '__file__') and module.__file__:
+            module_path = Path(module.__file__).resolve()
             try:
-                module_path = Path(module.__file__).resolve()
                 if target_folder in module_path.parents:
                     del sys.modules[module_name]
-            except (ValueError, RuntimeError, OSError):
+            except (ValueError, RuntimeError):
                 continue
+
+    importlib.invalidate_caches()
 
 def setup_module_folder(modules_folder=None):
     """Set up module folder by clearing cache and adding to sys.path"""
