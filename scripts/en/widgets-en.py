@@ -233,7 +233,7 @@ https://github.com/hako-mikan/sd-webui-cd-tuner[CD-Tuner]
 """)
 
 Model_url_widget = factory.create_text('Model:', 'https://civitai.com/models/376130?modelVersionId=2553832')
-Vae_url_widget = factory.create_text('Vae:')
+Vae_url_widget = factory.create_text('Vae:', 'https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors?download=true')
 LoRA_url_widget = factory.create_text('LoRa:', 'https://od.lk/d/MzhfMzMwMDk2MTdf/hachi_illustrious.safetensors')
 Embedding_url_widget = factory.create_text('Embedding:')
 Extensions_url_widget = factory.create_text('Extensions:')
