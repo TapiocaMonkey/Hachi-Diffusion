@@ -5,8 +5,7 @@ from webui_utils import *                   # WEBUI / MODELs-DATA
 import json_utils as js                     # JSON
 
 from IPython.display import display, HTML, Javascript
-if 'COLAB_GPU' in os.environ:
-    from google.colab import output
+from google.colab import output
 from datetime import datetime
 import ipywidgets as widgets
 from pathlib import Path
@@ -121,7 +120,7 @@ HR = widgets.HTML('<hr>')
 """Create model selection widgets"""
 model_header = factory.create_header('Выбор Модели')
 model_options = read_model_data(f"{SCRIPTS}/_models-data.py", 'model')
-model_widget = factory.create_dropdown(model_options, 'Модель:', '2. BluMix [Anime] [V7] + INP')
+model_widget = factory.create_dropdown(model_options, 'Модель:', 'none')
 model_num_widget = factory.create_text('Номер Модели:', '', 'Введите номера моделей для скачивания.')
 inpainting_model_widget = factory.create_checkbox('Inpainting Модели', False, class_names=['inpaint'], layout={'width': '250px'})
 XL_models_widget = factory.create_checkbox('SDXL', False, class_names=['sdxl'])
@@ -132,7 +131,7 @@ switch_model_widget = factory.create_hbox([inpainting_model_widget, XL_models_wi
 """Create VAE selection widgets"""
 vae_header = factory.create_header('Выбор VAE')
 vae_options = read_model_data(f"{SCRIPTS}/_models-data.py", 'vae')
-vae_widget = factory.create_dropdown(vae_options, 'Vae:', '3. Blessed2.vae')
+vae_widget = factory.create_dropdown(vae_options, 'Vae:', 'none')
 vae_num_widget = factory.create_text('Номер Vae:', '', 'Введите номера vae для скачивания.')
 
 # --- ADDITIONAL ---
@@ -163,7 +162,7 @@ branches_options = fetch_github_branches(REPO_MAP['A1111'])
 branch_widget = factory.create_dropdown(branches_options, 'Branch:', 'none', layout={'width': '400px', 'margin': '0 0 0 8px'})    # margin-left
 checkout_options_box = factory.create_hbox([commit_hash_widget, branch_widget])
 
-civitai_token_widget = factory.create_text('CivitAI Token:', '', 'Введите свой API-токен CivitAi.')
+civitai_token_widget = factory.create_text('CivitAI Token:', 'f49f7c1a1a4b60890e4bdcdb8b194c70', 'Введите свой API-токен CivitAi.')
 civitai_button = create_expandable_button('Получить CivitAI Токен', 'https://civitai.com/user/account')
 civitai_box = factory.create_hbox([civitai_token_widget, civitai_button])
 
@@ -179,7 +178,7 @@ zrok_token_widget = factory.create_text('Zrok Token:')
 zrok_button = create_expandable_button('Зарегать Zrok Токен', 'https://colab.research.google.com/drive/1d2sjWDJi_GYBUavrHSuQyHTDuLy36WpU')
 zrok_box = factory.create_hbox([zrok_token_widget, zrok_button])
 
-commandline_arguments_widget = factory.create_text('Аргументы:', WEBUI_PARAMS['A1111'])
+commandline_arguments_widget = factory.create_text('Аргументы:', '--opt-sdp-attention')
 
 accent_colors_options = ['anxety', 'blue', 'green', 'peach', 'pink', 'red', 'yellow']
 theme_accent_widget = factory.create_dropdown(accent_colors_options, 'Акцент Темы:', 'anxety',
@@ -233,9 +232,9 @@ $ext
 https://github.com/hako-mikan/sd-webui-cd-tuner[CD-Tuner]
 """)
 
-Model_url_widget = factory.create_text('Model:')
+Model_url_widget = factory.create_text('Model:', 'https://civitai.com/models/376130?modelVersionId=2553832')
 Vae_url_widget = factory.create_text('Vae:')
-LoRA_url_widget = factory.create_text('LoRa:')
+LoRA_url_widget = factory.create_text('LoRa:', 'https://drive.google.com/uc?export=download&id=1wbWM9zvXejJ9GRgVs83mnHFzD_HF2CgO')
 Embedding_url_widget = factory.create_text('Embedding:')
 Extensions_url_widget = factory.create_text('Extensions:')
 ADetailer_url_widget = factory.create_text('ADetailer:')

@@ -25,37 +25,6 @@ import os
 SKIP_INSTALL_VENV = '-s' in sys.argv or '--skip-install-venv' in sys.argv
 GDRIVE_LOG        = '-l' in sys.argv or '--gdrive-log' in sys.argv
 
-# === Kaggle Persistent Storage Restore ===
-# On Kaggle, the user can save /kaggle/working/sd-persistent as a Dataset Output
-# and then add it back as an Input dataset (e.g. named 'sd-persistent') in future
-# sessions.  When that input dataset is found, we rsync it back into the working
-# directory so nothing needs to be re-downloaded.
-def _kaggle_restore_from_input():
-    import glob, subprocess as _sp
-    candidates = glob.glob('/kaggle/input/*/sd-persistent')
-    if not candidates:
-        # Also accept a flat layout where the dataset root IS the persistent dir
-        candidates = [p for p in glob.glob('/kaggle/input/*') if (
-            (Path(p) / 'ANXETY').exists() or (Path(p) / 'venv').exists()
-        )]
-    if not candidates:
-        return
-    src = sorted(candidates)[-1]   # take the most recent dataset if multiple
-    dst = '/kaggle/working/sd-persistent'
-    Path(dst).mkdir(parents=True, exist_ok=True)
-    print(f'♻️  Restoring persistent install from {src} …', end='', flush=True)
-    result = _sp.run(
-        ['rsync', '-a', '--ignore-existing', f'{src}/', dst],
-        capture_output=True
-    )
-    if result.returncode == 0:
-        print('\r✅ Persistent install restored!                    ')
-    else:
-        print(f'\r⚠️  rsync exited {result.returncode} – continuing anyway.')
-
-if 'KAGGLE_URL_BASE' in os.environ:
-    _kaggle_restore_from_input()
-
 osENV = os.environ
 CD = os.chdir
 ipySys = get_ipython().system
@@ -341,8 +310,7 @@ if commit_hash or branch != 'none':
 
 
 # === Google Drive Mounting | EXCLUSIVE for Colab ===
-if ENV_NAME == 'Google Colab':
-    from google.colab import drive
+from google.colab import drive
 
 # Read GDrive settings
 _gdrive_cfg = js.read(SETTINGS_PATH, 'GDrive', {})
@@ -690,13 +658,12 @@ def handle_gdrive(mount_flag, ui='A1111', log=False, sync_files=False, sync_outp
     except Exception as e:
         print(f"{COL.R}❌ Setup error:{COL.X} {str(e)}")
 
-if ENV_NAME == 'Google Colab':
-    handle_gdrive(
-        mountGDrive, ui=UI, log=GDRIVE_LOG,
-        sync_files=GD_sync_files,
-        sync_outputs=GD_sync_outputs,
-        sync_configs=GD_sync_configs
-    )
+handle_gdrive(
+    mountGDrive, ui=UI, log=GDRIVE_LOG,
+    sync_files=GD_sync_files,
+    sync_outputs=GD_sync_outputs,
+    sync_configs=GD_sync_configs
+)
 
 
 # ======================= DOWNLOADING ======================
@@ -1048,8 +1015,8 @@ if UI == 'ComfyUI':
             else:
                 shutil.move(src, dest)
 
-## Copy dir from GDrive to extension_dir (if enabled, Colab only)
-if ENV_NAME == 'Google Colab' and mountGDrive and GD_sync_files:
+## Copy dir from GDrive to extension_dir (if enabled)
+if mountGDrive and GD_sync_files:
     gdrive_path = os.path.join(extension_dir, 'GDrive')
     if os.path.isdir(gdrive_path):
         for folder in os.listdir(gdrive_path):
@@ -1059,6 +1026,38 @@ if ENV_NAME == 'Google Colab' and mountGDrive and GD_sync_files:
                 shutil.copytree(src, dst, dirs_exist_ok=True)
         os.unlink(gdrive_path)
 
+
+## Kaggle Gallery Sync (Hachi)
+# Copia le immagini dal dataset 'hachi-gallery' nella cartella output di A1111
+# così Infinite Image Browsing le trova subito alla prima sessione
+import glob as _glob
+
+_gallery_input = '/kaggle/input/hachi-gallery'
+_output_dir = output_dir  # impostato da webui_utils
+
+if os.path.exists(_gallery_input) and _output_dir:
+    _images = _glob.glob(f'{_gallery_input}/**/*.png', recursive=True) + \
+              _glob.glob(f'{_gallery_input}/**/*.jpg', recursive=True) + \
+              _glob.glob(f'{_gallery_input}/**/*.webp', recursive=True)
+    if _images:
+        import shutil as _shutil
+        _dst = Path(_output_dir) / 'txt2img-images'
+        _dst.mkdir(parents=True, exist_ok=True)
+        _copied = 0
+        for _img in _images:
+            _target = _dst / Path(_img).name
+            if not _target.exists():
+                _shutil.copy2(_img, _target)
+                _copied += 1
+        if _copied > 0:
+            print(f'🖼️  Galleria: {_copied} immagini caricate da hachi-gallery')
+        else:
+            print(f'🖼️  Galleria: già aggiornata ({len(_images)} immagini)')
+    else:
+        print(f'🖼️  Dataset hachi-gallery trovato ma vuoto')
+else:
+    if not os.path.exists(_gallery_input):
+        print(f'💡 Galleria: aggiungi il dataset "hachi-gallery" come Input per caricare le immagini precedenti')
 
 ## List Models and stuff
 ipyRun('run', f"{SCRIPTS}/download-result.py")

@@ -104,8 +104,7 @@ class Tunnel:
         self.debug = debug
         self.timeout = timeout
         self.log_handlers = log_handlers or []
-        _home = Path(os.environ.get('home_path', '')) or Path.home()
-        self.log_dir = Path(log_dir) if log_dir else _home / 'tunnel_logs'
+        self.log_dir = Path(log_dir) if log_dir else Path.home() / 'tunnel_logs'
         self.log_dir.mkdir(parents=True, exist_ok=True)
         self.callback = callback
 

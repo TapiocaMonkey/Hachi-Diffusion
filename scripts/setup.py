@@ -27,19 +27,7 @@ if sample_data_path.exists() and sample_data_path.is_dir():
 
 # ================= PATH & GLOBAL CONSTANTS ================
 
-# ---- PERSISTENT STORAGE ----
-# On Kaggle, install everything under /kaggle/working/sd-persistent so that
-# the environment can be saved as a Dataset Output and re-mounted in future
-# sessions as an Input dataset — making the installation truly persistent.
-# On other platforms (Colab, etc.) we fall back to the home directory as before.
-_IS_KAGGLE = 'KAGGLE_URL_BASE' in os.environ
-if _IS_KAGGLE:
-    PERSISTENT_DIR = Path('/kaggle/working/sd-persistent')
-else:
-    PERSISTENT_DIR = Path.home()
-
-PERSISTENT_DIR.mkdir(parents=True, exist_ok=True)
-HOME = PERSISTENT_DIR
+HOME = Path.home()
 
 # Base project paths
 SCR_PATH = HOME / 'ANXETY'
@@ -76,7 +64,7 @@ DEFAULT_HF_REPO = 'NagisaNao/ANXETY'
 # Environments
 SUPPORTED_ENVS = {
     'COLAB_GPU': ('Google Colab', '/content'),
-    'KAGGLE_URL_BASE': ('Kaggle', '/kaggle/working/sd-persistent')
+    'KAGGLE_URL_BASE': ('Kaggle', '/kaggle/working')
 }
 
 # GitHub Source File (GSF)
